@@ -11,7 +11,7 @@ class Product extends Model
 
     protected $searchableColumns = ["code", "product_name"];
 
-    protected $defaultSortkey = "product_name";
+    public $defaultSortkey = "product_name";
 
     public $fileColumns = ["primary_photo"];
 
