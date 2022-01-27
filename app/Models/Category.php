@@ -9,8 +9,10 @@ class Category extends Model
 {
     use HasFactory;
 
-    protected $searchableColumns = ["code", "category_name"];
-    public $defaultSortkey = "category_name";
-
     protected $fillable = ["uuid", "code", "category_name"];
+
+    public function products()
+    {
+        return $this->hasMany(Product::class, "category_uuid", "uuid");
+    }
 }

@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,5 +15,21 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return Inertia::render('welcome', ["name" => "Seph"]);
+});
+
+Route::get('/products', function () {
+    return Inertia::render('Products/ui/index', ["name" => "Seph"]);
+});
+
+Route::get('/products/{id}', function () {
+    return Inertia::render('Products/ui/index', ["name" => "Seph"]);
+});
+
+Route::get('/categories', function () {
+    return Inertia::render('Category/ui/index', ["name" => "Seph"]);
+});
+
+Route::post("/logout", function(){
+    dd("user logging out");
 });

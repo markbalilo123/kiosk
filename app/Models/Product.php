@@ -29,4 +29,15 @@ class Product extends Model
                 "primary_photo"
             ];
 
+    public function group()
+    {
+        return $this->belongsTo(Group::class, "group_uuid", "uuid");
+    }
+
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class, "category_uuid", "uuid");
+    }
+
 }

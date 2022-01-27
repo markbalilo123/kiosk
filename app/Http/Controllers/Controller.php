@@ -3,12 +3,12 @@
 namespace App\Http\Controllers;
 
 use DB;
-
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Foundation\Validation\ValidatesRequests;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class Controller extends BaseController
@@ -44,7 +44,6 @@ class Controller extends BaseController
             return $response;
 
         } catch(\Exception $ex) {
-            Log::info($ex->getMessage());
             DB::rollback();
             return response()->json(["message" => $ex->getMessage()], 500);
         }
@@ -58,19 +57,15 @@ class Controller extends BaseController
      */
     public function store(Request $request)
     {
-        $validated = $request->validate($this->modelService->validatePayload());
+        $validated = $request->validate($this->modelService->requestValidator->rules());
         DB::beginTransaction();
         try {
             $record = $this->modelService->store($request);
-            Log::info($record);
-            if ($record["success"] == true) {
-                $response = response()->json($record, 201);
-                DB::commit();
-                return $response;
-            }
-
+            $response = response()->json($record, 201);
+            DB::commit();
+            return $response;
         } catch(\Exception $ex) {
-            Log::info($ex->getMessage());
+            Log::info($ex);
             DB::rollback();
             return response()->json(["message" => $ex->getMessage()], 500);
         }
@@ -83,10 +78,16 @@ class Controller extends BaseController
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function get($id)
     {
-        $category = $this->modelService->find($id);
-        return response()->json($category, 200);
+        try {
+            $record = $this->modelService->find($id);
+            return response()->json($record, 200);
+        }catch(ModelNotFoundException $ex) {
+            return response()->json(["message" => "Record not Found!"], 404);
+        }  catch(\Exception $ex) {
+            return response()->json(["message" => $ex->getMessage()], 500);
+        }
     }
 
 
@@ -99,7 +100,18 @@ class Controller extends BaseController
      */
     public function update(Request $request, $id)
     {
-        //
+        $validated = $request->validate($this->modelService->requestValidator->rules($id));
+        DB::beginTransaction();
+        try {
+            $record = $this->modelService->store($request, $id);
+            $response = response()->json($record, 200);
+            DB::commit();
+            return $response;
+        } catch(\Exception $ex) {
+            Log::info($ex);
+            DB::rollback();
+            return response()->json(["message" => $ex->getMessage()], 500);
+        }
     }
 
     /**
@@ -110,8 +122,39 @@ class Controller extends BaseController
      */
     public function destroy($id)
     {
-        //
+        DB::beginTransaction();
+        try {
+            $record = $this->modelService->delete($id);
+            if ($record["success"] == true) {
+                $response = response()->json($record, 200);
+                DB::commit();
+                return $response;
+            }
+        }catch(ModelNotFoundException $ex) {
+            return response()->json(["message" => "Record not Found!"], 404);
+        }  catch(\Exception $ex) {
+            return response()->json(["message" => $ex->getMessage()], 500);
+        }
     }
 
 
+    /**
+     * Display a listing of the resource.
+     * @param  \Illuminate\Http\Request
+     * @return \Illuminate\Http\Response
+     */
+    public function allSoftDeleted(Request $request)
+    {
+        return $this->modelService->getAllSoftDeleted($request);
+    }
+
+    /**
+     * Display a listing of the resource.
+     * @param  id int
+     * @return \Illuminate\Http\Response
+     */
+    public function findSoftDeleted($id)
+    {
+        return $this->modelService->findSoftDelete($id);
+    }
 }

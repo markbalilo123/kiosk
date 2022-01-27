@@ -2,11 +2,9 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Database\Eloquent\Model;
-
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class BaseService
 {
@@ -15,57 +13,80 @@ class BaseService
     protected $searchableColumns = [];
     public $defaultSortKey = "id";
     protected $fileStoragePath = "public";
+    public $requestValidator ;
+    protected $modelResource;
+    protected $imagePath = "storage";
+
 
     public function __construct($model)
     {
+        //pass the model use by the service
         $this->model = $model;
+
+        //get the table name of the model
         $this->tableName = $this->model->getTable();
+
+        //defaultSortkey will be the order by to be use
         $this->defaultSortKey = $this->model->defaultSortKey;
-        $this->searchableColumns = $this->model->searchableColumns;
+
+        //searchables columns should be declared on your model class, most of the time these are the fillable columns
+        $this->searchableColumns = $this->model->getFillable();
+
     }
 
-    public function getTable()
-    {
-        return $tableName;
-    }
 
 
+
+    //get the list of records with pagination
     public function getAll($request)
     {
-        $paginate = $request->paginate ?? 1000000;
-        $orderBy = $request->orderBy ?? $this->model->defaultSortkey;
-        Log::info("oprder by " . $orderBy);
-        $query = $this->model;
-        if($request->search){
-            $query->whereLike($this->model->searchableColumns, $request->search);
-        }
-        return $query->orderBy($orderBy, "asc")->paginate($paginate);
+        $paginate = $request->paginate ?? 10;
+        $orderBy  = $request->orderBy ?? $this->defaultSortKey;
+        $lookUp   = $request->search ?? "";
+        $result   = $this->model
+                    ->when($request->has("search"), function($query) use ($lookUp) {
+                        $query->whereLike($this->searchableColumns, $lookUp);
+                    })
+                    ->when(is_array($orderBy), function($query) use ($orderBy) {
+                            foreach($orderBy as $orderField) {
+                                $query->orderBy($orderField ,"asc");
+                            }
+                        }, function ($query) use ($orderBy) {
+                            $query->orderBy($orderBy, "asc");
+                        })
+                    ->paginate($paginate);
+
+        return $this->modelResource::collection($result);
     }
 
-    public function getFillable()
-    {
-        return $this->model->getFillable();
-    }
 
+
+    //find using the uuid column
     public function findUuid(string $uuid)
     {
-        return $this->model->where("uuid", $uuid)->first();
+        $data = $this->model->where("uuid", $uuid)->first();
+        return new $this->modelResource($data);
     }
 
-
+    //find using the incremental id of the table
     public function find(int $id)
     {
-        return $this->model->findOrFail($id);
+        $data = $this->model->findOrFail($id);
+        return new $this->modelResource($data);
     }
 
+    //find using the field and value pass to this function
     public function getBy($column, $value)
     {
-        return $this->model->where($column, $value)->first();
+        $data = $this->model->where($column, $value)->first();
+        return new $this->modelResource($data);
     }
 
 
+    //create record using create command, fillable must be set on the model to allow mass updating
     public function create($request)
     {
+        $validated = $request->validate($this->requestValidator->rules());
         $columns = $this->model->getFillable();
         $payload = $request->only($columns);
         if (in_array("uuid", $columns )) {
@@ -74,51 +95,60 @@ class BaseService
         return $this->model->create($payload);
     }
 
-
-    public function store($request)
+    //loop through the fillable columns and match on the payload to insert record on the table
+    public function store($request, $id = null)
     {
+
+        if ($id !== null) {
+            $this->model = $this->find($id);
+        }
         $uuid = Str::uuid(30);
         $columns = $this->model->getFillable();
         $fileColumns = $this->model->fileColumns;
-
         foreach($columns as $column) {
             if ($fileColumns && in_array($column, $fileColumns)) {
                 $this->model[$column] = $this->storeFile($request, $column, $uuid);
             }else {
-                $this->model[$column] = $request[$column] ?? null;
+                $this->model[$column] = $request[$column] ?? $this->model[$column];
             }
 
         }
-        if (in_array("uuid", $columns )) {
+
+        if (in_array("uuid", $columns ) and $id === null) {
             $this->model["uuid"] = $uuid;
         }
 
         $this->model->save();
-        return array("success" => true, "data" => $this->model);
+
+        return new $this->modelResource($this->model);
     }
 
 
-    public function storeFile($request, $columnName, $filename): string
+    //function to get the file attached from the payload and store on the storage folder
+    public function storeFile($request, $columnName, $filename)
     {
         if ($request->hasFile($columnName)) {
             $file = $request->file($columnName);
             $name = $filename.$request->file($columnName)->getClientOriginalExtension();
-            return $request->file($columnName)->store($this->fileStoragePath);
+            $path = $request->file($columnName)->store($this->fileStoragePath);
+            return str_replace("public","storage", $path);
         }
 
         return null;
     }
 
-    public function update($attributes, $id)
-    {
-        $record = $this->find($id);
-        return $record->update($attributes);
-    }
 
+    //pass the id od the record to be delete
     public function delete($id)
     {
         $record = $this->find($id);
-        return $record->delete();
+         if($record){
+             $record->delete();
+             return array(
+                 "success" => true,
+                 "message" => "Record deleted"
+             );
+         }
     }
 
     public function lookFor($criteria)
@@ -128,5 +158,30 @@ class BaseService
             ->orderBy($criteria["sortBy"] ?? $this->defaultSortKey, "asc")
             ->paginate($criteria["paginate"]);
     }
+
+
+    //get the list of soft deleted records with pagination
+    public function getAllSoftDeleted($request)
+    {
+        $paginate = $request->paginate ?? 10;
+        $orderBy  = $request->orderBy ?? $this->model->defaultSortKey;
+        $lookUp   = $request->search ?? "";
+        $result   = $this->model
+                    ->onlyTrashed()
+                    ->where(function($query) use ($lookUp) {
+                        $query->whereLike($this->model->searchableColumns, $lookUp);
+                    })
+                    ->orderBy($orderBy, "asc")
+                    ->paginate($paginate);
+        return $result;
+    }
+
+
+    //find using the incremental id of the table
+    public function findSoftDelete(int $id)
+    {
+        return $this->model->onlyTrashed()->findOrFail($id);
+    }
+
 
 }
