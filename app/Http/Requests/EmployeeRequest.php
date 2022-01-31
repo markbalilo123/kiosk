@@ -13,7 +13,7 @@ class EmployeeRequest extends FormRequest
      */
     public function authorize()
     {
-        return false;
+        return true;
     }
 
     /**
@@ -21,10 +21,10 @@ class EmployeeRequest extends FormRequest
      *
      * @return array
      */
-    public function rules()
+    public function rules($id = null)
     {
         return [
-            //
+            "emp_code"          => "required|unique:employees,emp_code,".$id,
         ];
     }
 }

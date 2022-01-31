@@ -6,6 +6,8 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\API\CategoryController;
 use App\Http\Controllers\API\GroupController;
 
+use App\Http\Controllers\API\EmployeeController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -41,4 +43,18 @@ Route::get("groups/{id}", [GroupController::class, "get"])->name("group.get");
 Route::post("groups", [GroupController::class, "store"])->name("group.store");
 Route::patch("groups/{id}", [GroupController::class, "update"])->name("group.update");
 Route::delete("groups/{id}", [GroupController::class, "destroy"])->name("group.destroy");
+
+
+Route::get("categories", [CategoryController::class, "all"])->name("category.list");
+Route::get("categories/{id}", [CategoryController::class, "get"])->name("category.get");
+Route::post("categories", [CategoryController::class, "store"])->name("category.store");
+Route::patch("categories/{id}", [CategoryController::class, "update"])->name("category.update");
+Route::delete("categories/{id}", [CategoryController::class, "destroy"])->name("category.destroy");
+
+
+Route::get("employees", [EmployeeController::class, "all"])->name("employees.list");
+Route::get("employees/{id}", [EmployeeController::class, "get"])->name("employees.get");
+Route::post("employees", [EmployeeController::class, "store"])->name("employees.store");
+Route::patch("employees/{id}", [EmployeeController::class, "update"])->name("employees.update");
+Route::delete("employees/{id}", [EmployeeController::class, "destroy"])->name("employees.destroy");
 
