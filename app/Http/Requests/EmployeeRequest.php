@@ -25,6 +25,7 @@ class EmployeeRequest extends FormRequest
     {
         return [
             "emp_code"          => "required|unique:employees,emp_code,".$id,
+            "last_name"          => "required"
         ];
     }
 }
