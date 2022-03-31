@@ -8,6 +8,8 @@ use App\Http\Controllers\API\GroupController;
 
 use App\Http\Controllers\API\EmployeeController;
 
+use App\Http\Controllers\API\TerminalController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -24,7 +26,11 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 
-Route::get("categories", [CategoryController::class, "all"])->name("category.list");
+Route::get("terminalServer", [TerminalController::class, "getServerTerminal"])->name("terminalServer.list");
+
+
+
+
 Route::get("categories/{id}", [CategoryController::class, "get"])->name("category.get");
 Route::post("categories", [CategoryController::class, "store"])->name("category.store");
 Route::patch("categories/{id}", [CategoryController::class, "update"])->name("category.update");

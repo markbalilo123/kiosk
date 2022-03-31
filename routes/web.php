@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\web\TerminalController;
 use Inertia\Inertia;
 
 /*
@@ -15,21 +16,31 @@ use Inertia\Inertia;
 */
 
 Route::get('/', function () {
-    return Inertia::render('welcome', ["name" => "Seph"]);
+    return Inertia::render('welcome', ["name" => "home"]);
 });
 
-Route::get('/products', function () {
-    return Inertia::render('Products/ui/index', ["name" => "Seph"]);
+Route::as('terminal.')
+    ->controller(TerminalController::class)
+    ->group(function () {
+        Route::get('/terminal', "getTerminal")->name("getTerminal");
 });
 
-Route::get('/products/{id}', function () {
-    return Inertia::render('Products/ui/index', ["name" => "Seph"]);
+Route::get('/maps', function () {
+    return Inertia::render('maps', ["name" => "About us"]);
 });
 
-Route::get('/categories', function () {
-    return Inertia::render('Category/ui/index', ["name" => "Seph"]);
+// Route::get('/routes', function () {
+//     return Inertia::render('routes', ["name" => "Routes"]);
+// });
+
+Route::get('/contact-us', function () {
+    return Inertia::render('contact-us', ["name" => "Contact us"]);
 });
 
-Route::post("/logout", function(){
-    dd("user logging out");
+Route::get('/about-us', function () {
+    return Inertia::render('about-us', ["name" => "About us"]);
+});
+
+Route::get('/faq', function () {
+    return Inertia::render('faq', ["name" => "FAQ"]);
 });

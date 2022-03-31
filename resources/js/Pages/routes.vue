@@ -1,60 +1,43 @@
 <template>
-  <div class="leading-normal tracking-normal text-gray-900" style="font-family: 'Source Sans Pro', sans-serif;">
+    <div class="leading-normal tracking-normal text-gray-900" style="font-family: 'Source Sans Pro', sans-serif;">
       <div class="h-screen pb-14 bg-right bg-cover">
-        <!--Nav-->
+         <!--Nav-->
 	      <div class="w-full container mx-auto p-6">
 			
           <Mainheader />
 
           <!--Main-->
-          <div class="container pt-24 md:pt-2 px-6 mx-auto flex flex-wrap flex-col md:flex-row items-center">
+          <div>
       
-            <!--Left Col-->
-            <div class="flex flex-col w-full xl:w-2/5 justify-center lg:items-start overflow-y-hidden">
-              <h1 class="my-4 text-3xl md:text-5xl text-purple-800 font-bold leading-tight text-center md:text-left slide-in-bottom-h1">Sitex Information Kiosk
-              </h1>
-              <p class="leading-normal text-base md:text-2xl mb-8 text-center md:text-left slide-in-bottom-subtitle">Sub-hero message, not too long and not too short. Make it just right!</p>
-            
-              <div class="flex w-full justify-center md:justify-start pb-24 lg:pb-0 fade-in">
-                <button
-                  @click="addNew"
-                  class="
-                    px-4
-                    py-4
-                    text-lg
-                    bg-indigo-900
-                    text-white
-                    bg-transparent
-                    hover:bg-white hover:text-indigo-900"
-                >
-                <span class="tracking-wider">Read more</span>
-                </button>
-              </div>
-            </div>
-      
-          <!--Right Col-->
-          <div class="w-full xl:w-3/5 py-6 overflow-y-hidden">
-            <img class="w-5/6 mx-auto lg:mr-0 slide-in-bottom" src="images/home.png">
-          </div>
-      
-          <!--Footer-->
+             <GMapMap
+      :center="{lat: 51.093048, lng: 6.842120}"
+      :zoom="7"
+      map-type-id="terrain"
+      style="width: 100vw; height: 900px"
+  >
+  </GMapMap>
+
+                <!--Footer-->
           <div class="w-full pt-16 pb-6 text-sm text-center md:text-left fade-in">
             <a class="text-gray-500 no-underline hover:no-underline" href="#">&copy; App 2022</a>
           </div>
+          </div>
         </div>
-      </div>
     </div>
   </div>
 </template>
 
 <script>
+import { ref, reactive, onMounted, computed } from "vue";
 import Mainheader from "./Components/Mainheader";
 import { Link } from "@inertiajs/inertia-vue3";
 
 export default {
-    components: { Link, Mainheader },
+    components: { Link, Mainheader, Map },
     props: {},
     setup() {
+
+        
       return {};
     },
 };
@@ -76,5 +59,6 @@ export default {
     @-webkit-keyframes slide-in-bottom{0%{-webkit-transform:translateY(1000px);transform:translateY(1000px);opacity:0}100%{-webkit-transform:translateY(0);transform:translateY(0);opacity:1}}@keyframes slide-in-bottom{0%{-webkit-transform:translateY(1000px);transform:translateY(1000px);opacity:0}100%{-webkit-transform:translateY(0);transform:translateY(0);opacity:1}}
     @-webkit-keyframes bounce-top{0%{-webkit-transform:translateY(-45px);transform:translateY(-45px);-webkit-animation-timing-function:ease-in;animation-timing-function:ease-in;opacity:1}24%{opacity:1}40%{-webkit-transform:translateY(-24px);transform:translateY(-24px);-webkit-animation-timing-function:ease-in;animation-timing-function:ease-in}65%{-webkit-transform:translateY(-12px);transform:translateY(-12px);-webkit-animation-timing-function:ease-in;animation-timing-function:ease-in}82%{-webkit-transform:translateY(-6px);transform:translateY(-6px);-webkit-animation-timing-function:ease-in;animation-timing-function:ease-in}93%{-webkit-transform:translateY(-4px);transform:translateY(-4px);-webkit-animation-timing-function:ease-in;animation-timing-function:ease-in}25%,55%,75%,87%{-webkit-transform:translateY(0);transform:translateY(0);-webkit-animation-timing-function:ease-out;animation-timing-function:ease-out}100%{-webkit-transform:translateY(0);transform:translateY(0);-webkit-animation-timing-function:ease-out;animation-timing-function:ease-out;opacity:1}}@keyframes bounce-top{0%{-webkit-transform:translateY(-45px);transform:translateY(-45px);-webkit-animation-timing-function:ease-in;animation-timing-function:ease-in;opacity:1}24%{opacity:1}40%{-webkit-transform:translateY(-24px);transform:translateY(-24px);-webkit-animation-timing-function:ease-in;animation-timing-function:ease-in}65%{-webkit-transform:translateY(-12px);transform:translateY(-12px);-webkit-animation-timing-function:ease-in;animation-timing-function:ease-in}82%{-webkit-transform:translateY(-6px);transform:translateY(-6px);-webkit-animation-timing-function:ease-in;animation-timing-function:ease-in}93%{-webkit-transform:translateY(-4px);transform:translateY(-4px);-webkit-animation-timing-function:ease-in;animation-timing-function:ease-in}25%,55%,75%,87%{-webkit-transform:translateY(0);transform:translateY(0);-webkit-animation-timing-function:ease-out;animation-timing-function:ease-out}100%{-webkit-transform:translateY(0);transform:translateY(0);-webkit-animation-timing-function:ease-out;animation-timing-function:ease-out;opacity:1}}
     @-webkit-keyframes fade-in{0%{opacity:0}100%{opacity:1}}@keyframes fade-in{0%{opacity:0}100%{opacity:1}}
-        
+    .gmap_canvas {overflow:hidden;background:none!important;height:548px;width:808px;}
+    .mapouter{position:relative;text-align:right;height:548px;width:808px;}
 </style>

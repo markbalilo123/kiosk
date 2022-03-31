@@ -1,61 +1,64 @@
 <template>
   <div class="leading-normal tracking-normal text-gray-900" style="font-family: 'Source Sans Pro', sans-serif;">
       <div class="h-screen pb-14 bg-right bg-cover">
-        <!--Nav-->
+         <!--Nav-->
 	      <div class="w-full container mx-auto p-6">
 			
           <Mainheader />
 
           <!--Main-->
-          <div class="container pt-24 md:pt-2 px-6 mx-auto flex flex-wrap flex-col md:flex-row items-center">
-      
-            <!--Left Col-->
-            <div class="flex flex-col w-full xl:w-2/5 justify-center lg:items-start overflow-y-hidden">
-              <h1 class="my-4 text-3xl md:text-5xl text-purple-800 font-bold leading-tight text-center md:text-left slide-in-bottom-h1">Sitex Information Kiosk
-              </h1>
-              <p class="leading-normal text-base md:text-2xl mb-8 text-center md:text-left slide-in-bottom-subtitle">Sub-hero message, not too long and not too short. Make it just right!</p>
-            
-              <div class="flex w-full justify-center md:justify-start pb-24 lg:pb-0 fade-in">
-                <button
-                  @click="addNew"
-                  class="
-                    px-4
-                    py-4
-                    text-lg
-                    bg-indigo-900
-                    text-white
-                    bg-transparent
-                    hover:bg-white hover:text-indigo-900"
-                >
-                <span class="tracking-wider">Read more</span>
-                </button>
+          <div>
+            <section class="text-gray-700">
+              <div class="container px-5 py-24 mx-auto">
+                <div class="text-center mb-20">
+                  <h1 class="my-4 text-1xl md:text-5xl text-purple-800 font-bold leading-tight text-center md:text-center slide-in-bottom-h1">Frequently Asked Question</h1>
+                  <p class="text-base leading-relaxed xl:w-2/4 lg:w-3/4 mx-auto">
+                    The most common questions about how our business works and what
+                    can do for you.
+                  </p>
+                </div>
+                <div class="flex flex-wrap lg:w-4/5 sm:mx-auto sm:mb-2 -mx-2">
+                  <div class="w-full lg:w-1/2 px-4 py-2">
+                    <template v-for="item in FAQ" :key="item.questions">  
+                      <details class="mb-4">
+                        <summary class="font-semibold  bg-gray-200 rounded-md py-2 px-4">
+                          {{item.questions}}
+                        </summary>
+                        <span>
+                          {{item.answers}}
+                        </span>
+                      </details>
+                    </template>
+                  </div>
+                </div>
               </div>
-            </div>
-      
-          <!--Right Col-->
-          <div class="w-full xl:w-3/5 py-6 overflow-y-hidden">
-            <img class="w-5/6 mx-auto lg:mr-0 slide-in-bottom" src="images/home.png">
-          </div>
-      
-          <!--Footer-->
+            </section>
+
+                <!--Footer-->
           <div class="w-full pt-16 pb-6 text-sm text-center md:text-left fade-in">
             <a class="text-gray-500 no-underline hover:no-underline" href="#">&copy; App 2022</a>
           </div>
+          </div>
         </div>
-      </div>
     </div>
   </div>
 </template>
 
 <script>
 import Mainheader from "./Components/Mainheader";
-import { Link } from "@inertiajs/inertia-vue3";
+import Config from './faqConfig.json';
 
 export default {
-    components: { Link, Mainheader },
+    components: { Mainheader },
     props: {},
     setup() {
       return {};
+    },
+
+    data(){
+      return {
+        FAQ: Config,
+      };
     },
 };
 </script>
